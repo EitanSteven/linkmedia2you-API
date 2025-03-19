@@ -39,8 +39,26 @@ downloadDirValidator(__download)
 
 const app = express()
 
-// Configuración de CORS para permitir solicitudes de cualquier origen
-app.use(cors()) // Esto permite solicitudes de cualquier frontend
+// Config CORS
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://www.linkmedia2you.com'
+]
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('CORS not allowed for this origin'))
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'x-access-token', 'Authorization'],
+  credentials: true
+}
+
+app.use(cors(corsOptions))
 
 app.locals.__download = __download
 
