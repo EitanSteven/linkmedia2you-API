@@ -8,7 +8,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "node --watch app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "postinstall": "mkdir -p ./node_modules/@distube/yt-dlp/bin && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ./node_modules/@distube/yt-dlp/bin/yt-dlp && chmod +x ./node_modules/@distube/yt-dlp/bin/yt-dlp"
   },
   "dependencies": {
     "@distube/yt-dlp": "^2.0.1",
