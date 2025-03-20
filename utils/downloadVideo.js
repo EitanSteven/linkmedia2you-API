@@ -1,5 +1,5 @@
 // import ytdlp from 'yt-dlp-exec'
-import ytdlp from '@distube/yt-dlp'
+import { exec } from '@distube/yt-dlp'
 
 export const downloadVideo = async (url, videoFilePath, mediaFormat) => {
   let count = 0
@@ -7,7 +7,7 @@ export const downloadVideo = async (url, videoFilePath, mediaFormat) => {
   while (count <= 3) {
     try {
       console.log(`Intento de Descarga N ° ${count}`)
-      await ytdlp.exec(url, {
+      await exec(url, {
         output: videoFilePath,
         format: `${mediaFormat === 'mp4' ? 'best' : 'bestaudio'}`,
         verbose: true
