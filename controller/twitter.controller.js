@@ -5,7 +5,7 @@ import { downloadVideo } from '../utils/downloadVideo.js'
 export const TwitterController = async (req, res) => {
   console.log('Controlador twitter')
 
-  const __download = '/downloads'
+  const __download = req.app.locals.__download
   console.log(`Download Dir: ${__download}`)
 
   const { url, format } = req.query
