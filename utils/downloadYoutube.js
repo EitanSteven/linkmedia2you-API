@@ -1,4 +1,6 @@
-import ytdlp from 'yt-dlp-exec'
+// import ytdlp from 'yt-dlp-exec'
+
+import ytdlp from '@distube/yt-dlp'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegPath from 'ffmpeg-static'
 import { unlink } from 'fs/promises'
