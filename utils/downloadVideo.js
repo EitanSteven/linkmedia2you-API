@@ -7,7 +7,7 @@ export const downloadVideo = async (url, videoFilePath, mediaFormat) => {
   while (count <= 3) {
     try {
       console.log(`Intento de Descarga N ° ${count}`)
-      await ytdlp(url, {
+      await ytdlp.exec(url, {
         output: videoFilePath,
         format: `${mediaFormat === 'mp4' ? 'best' : 'bestaudio'}`,
         verbose: true
