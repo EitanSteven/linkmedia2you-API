@@ -1,5 +1,6 @@
 // import ytdlp from 'yt-dlp-exec'
-import { exec } from '@distube/yt-dlp'
+import ytdlp from '@distube/yt-dlp'
+const { exec } = ytdlp
 
 export const downloadVideo = async (url, videoFilePath, mediaFormat) => {
   let count = 0
