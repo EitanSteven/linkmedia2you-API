@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { YoutubeController } from '../controller/Youtube.controller.js'
+import { YoutubeController } from '../controller/youtube.controller.js'
 
 const YoutubeRouter = Router()
 
