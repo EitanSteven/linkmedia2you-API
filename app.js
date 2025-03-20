@@ -59,13 +59,12 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions))
+app.use(express.json())
 
 app.locals.__download = __download
 
-app.use(express.json())
-
-app.get('/', (req, res) => {
-  res.send('Hola Mundo')
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({ status: 'ok' })
 })
 
 app.use('/api/v1/twitter', TwitterRouter)

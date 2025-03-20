@@ -1,5 +1,5 @@
 import path from 'path'
-import { downloadVideo } from '../utils/downloadVideo.js'
+import { downloadVideo } from '../utils/downloadYoutube.js'
 import { unlink } from 'fs/promises'
 
 export const YoutubeController = async (req, res) => {
@@ -37,7 +37,7 @@ export const YoutubeController = async (req, res) => {
   console.log('File video Path: ', videoFilePath)
 
   // IV Descargamos video
-  const succes = await downloadVideo(url, videoFilePath, mediaFormat)
+  const succes = await downloadVideo(videoId, url, videoFilePath, mediaFormat)
 
   if (succes) {
     res.download(videoFilePath, 'video.mp4', async (err) => {
