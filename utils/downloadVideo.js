@@ -17,6 +17,7 @@ export const downloadVideo = async (url, videoFilePath, mediaFormat) => {
       return succes
     } catch (error) {
       count++
+      console.error('❌ Error:', error.message)
       console.log(`Reintentando || Contador: ${count}`)
       await new Promise(resolve => setTimeout(resolve, 3000)) // Esperamos antes de volver a intentar
     }
