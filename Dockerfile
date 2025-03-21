@@ -19,6 +19,10 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
+# 3. Copia cookies y código (NUEVO)
+COPY . .
+COPY ./cookies /app/cookies
+
 # Crea directorios para archivos temporales
 RUN mkdir -p ./downloads && mkdir -p ./uploads
 
