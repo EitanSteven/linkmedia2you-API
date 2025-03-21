@@ -1,16 +1,17 @@
 FROM node:22-slim
 
-# 1. Primero instala pip
+# 1. Instala dependencias necesarias
 RUN apt-get update && \
     apt-get install -y \
     python3 \
-    python3-pip \   
+    python3-pip \
+    python3-venv \ 
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Ahora sí instala yt-dlp
-RUN python3 -m pip install --upgrade pip && \
-    pip install yt-dlp  
+# 2. Instala yt-dlp como usuario root temporalmente
+RUN python3 -m pip install --user --break-system-packages yt-dlp && \
+    mv /root/.local/bin/yt-dlp /usr/local/bin/yt-dlp
 
 # Configura entorno
 WORKDIR /app
