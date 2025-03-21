@@ -18,10 +18,8 @@ export const downloadVideo = async (videoId, url, outputFilePath, mediaFormat) =
       // En tu función downloadVideo
       const videoCommand = `yt-dlp \
       --cookies /app/cookies/cookies.txt \
-      --mark-watched \
-      --geo-bypass \
-      --force-ipv4 \
-      --no-check-certificate \
+      --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+      --referer "https://www.youtube.com/" \
       -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" \
       --merge-output-format mp4 \
       --output "${outputFilePath}" \
