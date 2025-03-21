@@ -9,7 +9,14 @@ export const downloadVideo = async (videoId, url, outputFilePath, mediaFormat) =
     console.log(`🚀 Iniciando descarga (${mediaFormat}) para: ${url}`)
 
     if (mediaFormat === 'm4a') {
-      const audioCommand = `yt-dlp -f bestaudio -x --audio-format m4a --output "${outputFilePath}" ${url}`
+      const audioCommand = `yt-dlp \
+      --cookies /app/cookies/cookies.txt \
+      --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+      --referer "https://www.youtube.com/" \
+      -f bestaudio -x --audio-format m4a \
+      --output "${outputFilePath}" \
+      "${url}"`
+
       console.log('Ejecutando comando de audio:', audioCommand)
       await execPromise(audioCommand)
       return true
