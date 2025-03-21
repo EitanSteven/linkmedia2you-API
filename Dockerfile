@@ -19,16 +19,11 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Copia cookies manuales
-COPY cookies /app/cookies
+# Crea directorios para archivos temporales
+RUN mkdir -p ./downloads && mkdir -p ./uploads
 
-# Script para validar formato
-RUN echo '#!/bin/bash\n\
-    if ! head -n 1 /app/cookies/cookies.txt | grep -q "HTTP Cookie File"; then\n\
-    echo "ERROR: Formato incorrecto de cookies.txt" >&2\n\
-    exit 1\n\
-    fi\n\
-    node app.js' > entrypoint.sh && \
-    chmod +x entrypoint.sh
+# Expone el puerto y ejecuta la API
+EXPOSE 3000
+CMD ["node", "app.js"]
 
-CMD ["./entrypoint.sh"]
+# Retornando Dockerfile
