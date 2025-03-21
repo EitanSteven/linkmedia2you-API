@@ -16,7 +16,17 @@ export const downloadVideo = async (videoId, url, outputFilePath, mediaFormat) =
 
     if (mediaFormat === 'mp4') {
       // En tu función downloadVideo
-      const videoCommand = `yt-dlp --cookies /app/cookies/cookies.txt -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4 --output "${outputFilePath}" ${url}`
+      const videoCommand = `yt-dlp \
+      --cookies /app/cookies/cookies.txt \
+      --mark-watched \
+      --geo-bypass \
+      --force-ipv4 \
+      --no-check-certificate \
+      -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" \
+      --merge-output-format mp4 \
+      --output "${outputFilePath}" \
+      "${url}"`
+
       console.log('Ejecutando comando de video:', videoCommand)
       await execPromise(videoCommand)
       return true
