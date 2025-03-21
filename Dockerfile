@@ -1,6 +1,6 @@
 FROM node:22-slim
 
-# Instala dependencias con limpieza automática
+# 1. Instala dependencias como root
 RUN apt-get update && \
     apt-get install -y \
     curl \
@@ -9,22 +9,27 @@ RUN apt-get update && \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Configura usuario no-root primero
-RUN useradd -m appuser && mkdir -p /app && chown -R appuser:appuser /app
-USER appuser
+# 2. Configura usuario y directorio
 WORKDIR /app
+RUN chown -R node:node /app
 
-# Copia solo lo necesario para aprovechar caché
-COPY package*.json ./
+# 3. Copia archivos con permisos correctos ANTES de cambiar de usuario
+COPY --chown=node:node package*.json ./
+
+# 4. Instala dependencias como root temporalmente
 RUN npm install --omit=dev
 
-# Copia el resto del código y cookies
-COPY . .
-COPY --chown=appuser:appuser ./cookies /app/cookies
+# 5. Cambia a usuario no-root
+USER node
 
-# Crea directorios con permisos explícitos
-RUN mkdir -p downloads uploads && \
-    chmod 755 cookies/cookies.txt
+# 6. Copia el resto del código
+COPY --chown=node:node . .
+
+# 7. Configura cookies y directorios
+RUN mkdir -p cookies downloads uploads && \
+    chmod 755 cookies
+
+COPY --chown=node:node ./cookies /app/cookies
 
 EXPOSE 3000
 CMD ["node", "app.js"]
