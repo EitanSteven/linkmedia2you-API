@@ -1,14 +1,16 @@
 FROM node:22-slim
 
-# Instala dependencias esenciales
+# 1. Primero instala pip
 RUN apt-get update && \
     apt-get install -y \
     python3 \
+    python3-pip \   
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Instala yt-dlp
-RUN python3 -m pip install --upgrade yt-dlp
+# 2. Ahora sí instala yt-dlp
+RUN python3 -m pip install --upgrade pip && \
+    pip install yt-dlp  
 
 # Configura entorno
 WORKDIR /app
