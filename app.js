@@ -30,6 +30,7 @@ async function pathExist (path) {
 async function downloadDirValidator (ruta) {
   if (!await pathExist(ruta)) {
     await mkdir(ruta, { recursive: true })
+    console.log(`Directorio creado: ${ruta}`)
   }
 }
 
