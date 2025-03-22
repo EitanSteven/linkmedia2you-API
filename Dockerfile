@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y \
     curl \
     python3 \
-    chromium \
+    chromium-browser \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
