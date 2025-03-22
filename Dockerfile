@@ -15,6 +15,7 @@ RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o 
 
 # 3. Configurar entorno para Puppeteer
 WORKDIR /app
+RUN chown -R node:node /app
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # 4. Copiar e instalar dependencias de Node
@@ -27,8 +28,9 @@ USER node
 # 6. Copiar código de la aplicación
 COPY --chown=node:node . .
 
-# 7. Crear directorios necesarios
-RUN mkdir -p cookies downloads uploads
+# 7. Crear directorios necesarios con permisos correctos
+RUN mkdir -p cookies downloads uploads && \
+    chmod 755 cookies downloads uploads
 
 EXPOSE 3000
 CMD ["node", "app.js"]
