@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y \
     curl \
     python3 \
-    ffmpeg \
+    chromium \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
