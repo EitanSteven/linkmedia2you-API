@@ -1,12 +1,24 @@
 FROM node:22-slim
 
-# 1. Instalar dependencias del sistema incluyendo FFmpeg
+# Añadir estas dependencias en el bloque de instalación
 RUN apt-get update && \
     apt-get install -y \
     curl \
     python3 \
     chromium \
     ffmpeg \
+    gconf-service \
+    libgbm-dev \
+    libglib2.0-dev \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxi6 \
+    libxtst6 \
+    fonts-liberation \
+    libappindicator1 \
+    xdg-utils \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
