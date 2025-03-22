@@ -1,11 +1,12 @@
 FROM node:22-slim
 
-# 1. Instalar dependencias del sistema
+# 1. Instalar dependencias del sistema incluyendo FFmpeg
 RUN apt-get update && \
     apt-get install -y \
     curl \
     python3 \
     chromium \
+    ffmpeg \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -28,9 +29,8 @@ USER node
 # 6. Copiar código de la aplicación
 COPY --chown=node:node . .
 
-# 7. Crear directorios necesarios con permisos correctos
-RUN mkdir -p cookies downloads uploads && \
-    chmod 755 cookies downloads uploads
+# 7. Crear directorios necesarios
+RUN mkdir -p cookies downloads uploads
 
 EXPOSE 3000
 CMD ["node", "app.js"]
