@@ -17,6 +17,9 @@ RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o 
 WORKDIR /app
 RUN chown -R node:node /app
 
+# iniciar Chrome y crear un perfil de usuario
+RUN mkdir -p /home/node/.config/chromium/Default
+
 # 3. Copia archivos con permisos correctos ANTES de cambiar de usuario
 COPY --chown=node:node package*.json ./
 
