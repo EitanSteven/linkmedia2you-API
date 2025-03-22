@@ -1,42 +1,34 @@
 FROM node:22-slim
 
-# 1. Instala dependencias como root
+# 1. Instalar dependencias del sistema
 RUN apt-get update && \
     apt-get install -y \
     curl \
     python3 \
-    chromium-browser \
+    chromium \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Instala yt-dlp
+# 2. Instalar yt-dlp
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
     chmod a+rx /usr/local/bin/yt-dlp
 
-# 2. Configura usuario y directorio
+# 3. Configurar entorno para Puppeteer
 WORKDIR /app
-RUN chown -R node:node /app
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# iniciar Chrome y crear un perfil de usuario
-RUN mkdir -p /home/node/.config/chromium/Default
-
-# 3. Copia archivos con permisos correctos ANTES de cambiar de usuario
+# 4. Copiar e instalar dependencias de Node
 COPY --chown=node:node package*.json ./
-
-# 4. Instala dependencias como root temporalmente
 RUN npm install --omit=dev
 
-# 5. Cambia a usuario no-root
+# 5. Configurar usuario no-root
 USER node
 
-# 6. Copia el resto del código
+# 6. Copiar código de la aplicación
 COPY --chown=node:node . .
 
-# 7. Configura cookies y directorios
-RUN mkdir -p cookies downloads uploads && \
-    chmod 755 cookies
-
-COPY --chown=node:node ./cookies /app/cookies
+# 7. Crear directorios necesarios
+RUN mkdir -p cookies downloads uploads
 
 EXPOSE 3000
 CMD ["node", "app.js"]
