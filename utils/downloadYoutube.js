@@ -14,6 +14,7 @@ export const downloadVideo = async (videoId, url, outputFilePath, mediaFormat) =
       : '-f bestaudio -x --audio-format m4a'
 
     const command = `yt-dlp \
+      --cookies-from-browser
       --no-check-certificates \
       --force-ipv4 \
       ${formatFlag} \
