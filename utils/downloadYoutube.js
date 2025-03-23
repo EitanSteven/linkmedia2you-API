@@ -1,130 +1,111 @@
 import { exec } from 'child_process'
 import util from 'util'
-import puppeteer from 'puppeteer'
+import { initBrowser } from './puppeteer-utils.js'
 import fs from 'fs/promises'
 
 const execPromise = util.promisify(exec)
+const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-// Función mejorada para formatear cookies
 const formatCookies = (cookies) => {
-  const header = '# HTTP Cookie File\n' // Encabezado necesario
-  const formatted = cookies.map(cookie => {
-    const domain = cookie.domain.startsWith('.') ? cookie.domain : `.${cookie.domain}`
-    const expires = cookie.expires === -1
-      ? Math.floor(Date.now() / 1000) + 3600 // 1 hora si es cookie de sesión
-      : Math.floor(cookie.expires)
-
-    return [
-      domain,
-      'TRUE',
-      cookie.path || '/',
-      cookie.secure ? 'TRUE' : 'FALSE',
-      expires.toString(),
-      cookie.name,
-      cookie.value
-    ].join('\t')
-  }).join('\n')
-
-  return header + formatted
+  const header = '# HTTP Cookie File\n'
+  return header + cookies.map(cookie => [
+    cookie.domain.startsWith('.') ? cookie.domain : `.${cookie.domain}`,
+    'TRUE',
+    cookie.path || '/',
+    cookie.secure ? 'TRUE' : 'FALSE',
+    Math.floor(cookie.expires === -1 ? Date.now() / 1000 + 86400 : cookie.expires),
+    cookie.name,
+    cookie.value
+  ].join('\t')).join('\n')
 }
+
+const humanLikeDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const downloadVideo = async (videoId, url, outputFilePath, mediaFormat) => {
   let browser
   try {
     console.log(`🚀 Iniciando descarga (${mediaFormat}) para: ${url}`)
 
-    // 1. Configuración mejorada de Puppeteer
-    browser = await puppeteer.launch({
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process'
-      ],
-      headless: 'new',
-      timeout: 60000
-    })
-
+    // 1. Configuración avanzada del navegador
+    browser = await initBrowser()
     const page = await browser.newPage()
 
-    // 2. Configuración de navegación
-    await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
-    await page.setViewport({ width: 1280, height: 720 })
-    await page.setJavaScriptEnabled(true)
+    // 2. Emulación de hardware real
+    await page.setUserAgent(USER_AGENT)
+    await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 })
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(Object.getPrototypeOf(navigator), 'webdriver', {
+        get: () => undefined,
+        configurable: true
+      })
+    })
 
-    // 3. Manejo de URLs de Shorts
+    // 3. Navegación avanzada
     const processedUrl = url.replace('/shorts/', '/watch?v=')
-
-    // 4. Navegación con timeout extendido
     await page.goto(processedUrl, {
       waitUntil: 'networkidle2',
-      timeout: 120000
+      timeout: 60000,
+      referer: 'https://www.youtube.com/'
     })
+
+    // 4. Comportamiento humano simulado
+    await humanLikeDelay(2000)
+    await page.mouse.move(100, 100)
+    await page.mouse.wheel({ deltaY: 500 })
+    await humanLikeDelay(1000)
 
     // 5. Manejo de cookies mejorado
     try {
       const acceptButton = await page.waitForSelector(
         'button:has-text("Accept all"), button:has-text("Aceptar todo")',
-        { timeout: 15000 }
+        { timeout: 10000 }
       )
       await acceptButton.click()
-      await page.waitForNavigation({
-        waitUntil: 'networkidle2',
-        timeout: 45000
-      })
+      await page.waitForNavigation({ timeout: 30000 })
     } catch (error) {
-      console.log('No se encontró el botón de aceptar cookies')
+      console.log('No se encontró el botón de cookies')
     }
 
-    // 6. Obtención y guardado de cookies
+    // 6. Extracción de cookies con validación
     const cookies = await page.cookies()
-    const cookiesDir = '/app/cookies'
-    const cookiesPath = `${cookiesDir}/cookies.txt`
-
-    await fs.mkdir(cookiesDir, { recursive: true })
-    await fs.writeFile(cookiesPath, formatCookies(cookies))
-    console.log('✅ Cookies guardadas correctamente en:', cookiesPath)
-
-    // 7. Configuración dinámica del comando
-    const commandOptions = [
-      '--cookies', cookiesPath,
-      '--user-agent', '"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"',
-      '--referer', '"https://www.youtube.com/"',
-      '--output', `"${outputFilePath}"`,
-      `"${processedUrl}"`
-    ]
-
-    if (mediaFormat === 'm4a') {
-      commandOptions.splice(2, 0,
-        '-f', 'bestaudio',
-        '-x',
-        '--audio-format', 'm4a'
-      )
-    } else if (mediaFormat === 'mp4') {
-      commandOptions.splice(2, 0,
-        '-f', '"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]"',
-        '--merge-output-format', 'mp4'
-      )
+    if (!cookies.some(c => c.name === 'LOGIN_INFO' || c.name === 'PREF')) {
+      throw new Error('Faltan cookies esenciales de YouTube')
     }
 
-    // 8. Ejecución segura del comando
-    const command = ['yt-dlp', ...commandOptions].join(' ')
-    console.log('⌛ Ejecutando comando:', command)
+    const cookiesPath = '/app/cookies/cookies.txt'
+    await fs.writeFile(cookiesPath, formatCookies(cookies))
 
-    const { stdout, stderr } = await execPromise(command, {
-      timeout: 300000 // 5 minutos timeout
+    // 7. Comando yt-dlp con parámetros anti-detection
+    const command = [
+      'yt-dlp',
+      `--cookies ${cookiesPath}`,
+      '--no-check-certificates',
+      '--force-ipv4',
+      '--socket-timeout 30',
+      '--source-address 0.0.0.0',
+      '--http-chunk-size 10M',
+      '--referer "https://www.youtube.com/"',
+      '--add-header "Accept-Language:en-US,en;q=0.9"',
+      mediaFormat === 'mp4'
+        ? '-f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4'
+        : '-f bestaudio -x --audio-format m4a',
+      `--output "${outputFilePath}"`,
+      `"${processedUrl}"`
+    ].join(' ')
+
+    console.log('⌛ Ejecutando comando:', command)
+    // Por esta versión optimizada
+    const { stdout: debugOutput, stderr } = await execPromise(command, {
+      timeout: 300000
     })
 
+    console.log('✅ Salida del comando:', debugOutput) // Ahora usado
     if (stderr) console.warn('⚠️ Advertencias:', stderr)
 
     return true
   } catch (error) {
     console.error('❌ Error crítico:', error)
-    throw new Error(`Fallo en la descarga: ${error.message}`)
+    throw new Error(`Error mejorado: ${error.message}`)
   } finally {
     if (browser) await browser.close()
   }

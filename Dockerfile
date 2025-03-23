@@ -12,6 +12,9 @@ RUN apt-get update && \
     libglib2.0-dev \
     libx11-xcb1 \
     libxcomposite1 \
+    libxshmfence-dev \
+    libglu1-mesa-dev \
+    xvfb \
     libxcursor1 \
     libxdamage1 \
     libxi6 \
